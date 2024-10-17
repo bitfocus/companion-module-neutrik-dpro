@@ -1,0 +1,48 @@
+{
+	"devstatus_runmode": [
+		{ "id": "normal", "label": "Normal" },
+		{ "id": "emergency", "label": "Emergency" },
+		{ "id": "booting", "label": "Booting" },
+		{ "id": "update", "label": "Update" },
+		{ "id": "diagnostics", "label": "Diagnostics" }
+	],
+	"devstatus_error": [
+		{ "id": "nothing", "label": "Nothing" },
+		{ "id": "devfail", "label": "Dev Fail" },
+		{ "id": "assert", "label": "Assert" },
+		{ "id": "sysdown", "label": "Sys Down" }
+	],
+	"Dev/SystemStatus": {
+		"Val": [
+			{ "id": 0, "label": "Virtual State" },
+			{ "id": 1, "label": "Not Operating" },
+			{ "id": 2, "label": "Operating Normally" },
+			{ "id": 3, "label": "Brooklyn2 Error" },
+			{ "id": 4, "label": "Corrupt MAC Address" },
+			{ "id": 5, "label": "Cooling Fan Stopping" },
+			{ "id": 6, "label": "Corrupt SRAM Data" },
+			{ "id": 7, "label": "Device ID Conflict" },
+			{ "id": 8, "label": "Dipswitch Setting Error" },
+			{ "id": 9, "label": "Version Mismatch" },
+			{ "id": 10, "label": "Dante Resource Overflow" },
+			{ "id": 11, "label": "Dante Setting Mismatch" }
+		]
+	},
+	"Dev/SyncStatus": {
+		"Val": [
+			{ "id": 0, "label": "Not Operating" },
+			{ "id": 1, "label": "Operating Normally" },
+			{ "id": 2, "label": "Synchronized" },
+			{ "id": 3, "label": "Incorrect Wordclock Setting" },
+			{ "id": 4, "label": "Dante Not Connected" },
+			{ "id": 5, "label": "Dante Connection Failure" },
+			{ "id": 6, "label": "Not Gb Ethernet" },
+			{ "id": 7, "label": "Redundant [Secondary] Running" },
+			{ "id": 8, "label": "Redundant [Secondary] Error" },
+			{ "id": 9, "label": "Leader Running" },
+			{ "id": 10, "label": "Leader Running + Not GbE" },
+			{ "id": 11, "label": "Leader Running + Redundant [Sec] Running" },
+			{ "id": 12, "label": "Leader Running + Redundant [Sec] Error" }
+		]
+	}
+}

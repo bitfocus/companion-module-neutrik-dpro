@@ -1,0 +1,36 @@
+{
+	"id": "neutrik-rcp",
+	"name": "neutrik-rcp",
+	"shortname": "DPRO",
+	"description": "Neutrik NA2-IO-DPRO",
+	"version": "0.0.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-module-neutrik-rcp.git",
+	"bugs": "https://discourse.checkcheckonetwo.com",
+	"maintainers": [
+		{
+			"name": "Andrew Broughton",
+			"email": "andy@checkcheckonetwo.com"
+		},
+		{
+			"name": "Phillip Ivan Pietruschka",
+			"email": "ivanpietruschka@gmail.com"
+		}
+	],
+	"legacyIds": [],
+	"runtime": {
+		"type": "node22",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../index.js"
+	},
+	"manufacturer": "Neutrik",
+	"products": ["NA-2-IO-DPRO"],
+	"keywords": ["Dante", "Yamaha", "Neutrik", "RCP"],
+	"bonjourQueries": {
+		"bonjour_host": {
+			"type": "ypa-scp",
+			"protocol": "tcp"
+		}
+	}
+}

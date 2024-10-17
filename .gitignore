@@ -1,0 +1,9 @@
+node_modules/
+package-lock.json
+/pkg
+/pkg.tgz
+DEBUG-*
+.DS_Store
+companion-module-neutrik-rcp.code-workspace
+.vscode/
+.yarn/
