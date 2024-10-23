@@ -1,5 +1,5 @@
 {
-	"name": "neutrik-rcp",
+	"name": "neutrik-dpro",
 	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {

@@ -1,6 +1,6 @@
 {
-	"id": "neutrik-rcp",
-	"name": "neutrik-rcp",
+	"id": "neutrik-dpro",
+	"name": "neutrik-dpro",
 	"shortname": "DPRO",
 	"description": "Neutrik NA2-IO-DPRO",
 	"version": "0.0.0",
