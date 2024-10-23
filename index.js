@@ -15,7 +15,7 @@ const METER_REFRESH = 10000
 const KA_INTERVAL = 10000
 
 // Instance Setup
-class instance extends InstanceBase {
+class Neutrik_DPRO extends InstanceBase {
 	constructor(internal) {
 		super(internal)
 	}
@@ -30,7 +30,6 @@ class instance extends InstanceBase {
 		this.dataStore = {} // status, Address (using ":"), X, Y, Val
 		this.cmdQueue = [] // prefix, Address (using ":"), X, Y, Val
 		this.queueTimer
-		this.meterTimer = {}
 		this.kaTimer = {}
 		this.variables = []
 		this.newConsole()
@@ -47,7 +46,7 @@ class instance extends InstanceBase {
 	// Module deletion
 	async destroy() {
 		clearTimeout(this.queueTimer)
-		clearInterval(this.meterTimer)
+		clearInterval(this.kaTimer)
 		this.socket?.destroy()
 		this.log('debug', `[${new Date().toJSON()}] destroyed ${this.id}`)
 	}
@@ -61,9 +60,7 @@ class instance extends InstanceBase {
 				label: 'Device Type',
 				width: 12,
 				default: 'NA2-IO-DPRO',
-				choices: [
-					{ id: 'NA2-IO-DPRO', label: 'NA2-IO-DPRO' },
-				],
+				choices: [{ id: 'NA2-IO-DPRO', label: 'NA2-IO-DPRO' }],
 				isVisible: () => false,
 			},
 			{
@@ -88,22 +85,6 @@ class instance extends InstanceBase {
 				label: '',
 				width: 6,
 				isVisible: (options) => !!options.bonjour_host,
-			},
-			{
-				type: 'checkbox',
-				id: 'metering',
-				label: 'Enable Metering?',
-				width: 3,
-				default: false,
-			},
-			{
-				type: 'number',
-				id: 'meterSpeed',
-				label: 'Metering interval (40 - 1000 ms)',
-				width: 8,
-				default: 100,
-				min: 40,
-				max: 1000,
 			},
 		]
 		return config
@@ -146,15 +127,12 @@ class instance extends InstanceBase {
 			this.socket.on('connect', () => {
 				this.log('info', `Connected!`)
 				this.updateStatus(InstanceStatus.Ok)
-				clearInterval(this.meterTimer)
 				clearInterval(this.kaTimer)
 				varFuncs.getVars(this)
 				this.queueTimer = {}
 				this.processCmdQueue()
-				if (config.metering) {
-					this.startMeters()
-					this.meterTimer = setInterval(() => this.startMeters(), METER_REFRESH)
-				}
+				this.subscribeActions()
+				this.subscribeFeedbacks()
 
 				this.sendCmd(`scpmode keepalive ${KA_INTERVAL * 2}`) // Tell device to close connection after 2 * KA interval without RXing any messages
 				this.kaTimer = setInterval(() => this.sendCmd('devstatus runmode'), KA_INTERVAL) // Send message on KA interval to ensure connection isn't closed
@@ -196,30 +174,6 @@ class instance extends InstanceBase {
 									if (this.isRecordingActions) {
 										this.addToActionRecording({ rcpCmd: foundCmd, options: curCmd })
 									}
-								}
-								break
-
-							case 'sscurrent_ex':
-							case 'sscurrentt_ex':
-								if (curCmd.Status == 'NOTIFY') {
-									this.pollConsole()
-								}
-								break
-
-							case 'mtr':
-								if (foundCmd === undefined) break
-								if (foundCmd.Pickoff) {
-									let lastSlash = curCmd.Address.lastIndexOf('/')
-									let pickoff = curCmd.Address.slice(lastSlash + 1)
-									curCmd.Y = foundCmd.Pickoff.split('|').indexOf(pickoff)
-								}
-								curCmd.Address = foundCmd.Address
-								let i = 0
-								while (curCmd[i]) {
-									curCmd.X = i
-									curCmd.Val = parseInt(curCmd[i], 16)
-									this.addToDataStore(curCmd)
-									i++
 								}
 						}
 
@@ -303,40 +257,7 @@ class instance extends InstanceBase {
 
 	// Create the preset definitions
 	createPresets() {
-		this.rcpPresets = [
-			{
-				type: 'button',
-				category: 'Indicators',
-				name: 'Meter Level Indicator',
-				style: {
-					text: 'Meter',
-					size: 'auto',
-					color: combineRgb(255, 255, 255),
-					bgcolor: combineRgb(0, 0, 0),
-				},
-				steps: [],
-				feedbacks: [
-					{
-						feedbackId: 'Meter',
-						options: {
-							position: 'right',
-							padding: 1,
-							//							meterVal1: '',
-							//							meterVal2: ''
-						},
-					},
-					{
-						feedbackId: 'MIXER_Current/Meter/Mix/PostOn',
-						options: {
-							//							position: 'right',
-							//							padding: 1,
-							//							meterVal1: '',
-							//							meterVal2: ''
-						},
-					},
-				],
-			},
-		]
+		this.rcpPresets = []
 
 		this.setPresetDefinitions(this.rcpPresets)
 	}
@@ -405,9 +326,9 @@ class instance extends InstanceBase {
 
 	// Add a value to the dataStore
 	addToDataStore(cmd) {
-		let dsAddr = cmd.Address
-		let dsX = cmd.X == undefined ? 0 : parseInt(cmd.X)
-		let dsY = cmd.Y == undefined ? 0 : parseInt(cmd.Y)
+		const dsAddr = cmd.Address
+		const dsX = cmd.X == undefined ? 0 : parseInt(cmd.X)
+		const dsY = cmd.Y == undefined ? 0 : parseInt(cmd.Y)
 
 		if (this.dataStore[dsAddr] == undefined) {
 			this.dataStore[dsAddr] = {}
@@ -444,22 +365,6 @@ class instance extends InstanceBase {
 
 		return data
 	}
-
-	// Start requesting meter data
-	startMeters() {
-		let mtrFeedbacks = rcpCommands.filter((f) => f.Type == 'mtr')
-		let fbNames = Array.from(mtrFeedbacks, (f) => f.Address)
-		fbNames.forEach((fb) => {
-			let cmd = this.dataStore[fb]
-			if (cmd) {
-				for (let key in cmd[0]) {
-					let cmdToSend = { Address: fb, X: 0, Y: key }
-					cmdToSend.prefix = 'get'
-					this.addToCmdQueue(cmdToSend)
-				}
-			}
-		})
-	}
 }
 
-runEntrypoint(instance, upgrades)
+runEntrypoint(Neutrik_DPRO, upgrades)

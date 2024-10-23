@@ -1,0 +1,15 @@
+{
+	"devstatus_runmode": [
+		{ "id": "normal", "label": "Normal" },
+		{ "id": "emergency", "label": "Emergency" },
+		{ "id": "booting", "label": "Booting" },
+		{ "id": "update", "label": "Update" },
+		{ "id": "diagnostics", "label": "Diagnostics" }
+	],
+	"devstatus_error": [
+		{ "id": "nothing", "label": "Nothing" },
+		{ "id": "devfail", "label": "Dev Fail" },
+		{ "id": "assert", "label": "Assert" },
+		{ "id": "sysdown", "label": "Sys Down" }
+	]
+}

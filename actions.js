@@ -2,7 +2,7 @@ module.exports = {
 	// Create single Action/Feedback
 	createAction: (instance, rcpCmd) => {
 		const rcpNames = require('./rcpNames.json')
-		const xdipChoices = require('./xdipChoices.json')
+		const dProChoices = require('./dProChoices.json')
 		const paramFuncs = require('./paramFuncs.js')
 
 		let newAction = {}
@@ -25,13 +25,13 @@ module.exports = {
 				required: true,
 				useVariables: true,
 			}
-			if (xdipChoices[actionName] !== undefined) {
+			if (dProChoices[actionName] !== undefined) {
 				XOpts = {
 					...XOpts,
 					type: 'dropdown',
-					label: xdipChoices[actionName].xName || actionNameParts[rcpNameIdx],
+					label: dProChoices[actionName].xName || actionNameParts[rcpNameIdx],
 					minChoicesForSearch: 0,
-					choices: xdipChoices[actionName].X,
+					choices: dProChoices[actionName].X,
 					allowCustom: true,
 				}
 			} else if (actionNameParts[rcpNameIdx].endsWith('Ch')) {
@@ -114,9 +114,9 @@ module.exports = {
 			case 'integer':
 			case 'freq':
 				if (rcpCmd.Max != 0 || rcpCmd.Min != 0) {
-					if (xdipChoices[actionName] !== undefined) {
-						ValOpts.label = xdipChoices[actionName].valName || actionNameParts[rcpNameIdx]
-						ValOpts.choices = xdipChoices[actionName].Val
+					if (dProChoices[actionName] !== undefined) {
+						ValOpts.label = dProChoices[actionName].valName || actionNameParts[rcpNameIdx]
+						ValOpts.choices = dProChoices[actionName].Val
 						paramsToAdd.push(ValOpts)
 					} else {
 						ValOpts = {
@@ -208,159 +208,20 @@ module.exports = {
 						}
 					}
 				}
-
+				newAction.subscribe = async (action, context) => {
+					let options = await paramFuncs.parseOptions(context, action.options)
+					if (options != undefined) {
+						let subscrAction = JSON.parse(JSON.stringify(options))
+						const foundCmd = paramFuncs.findRcpCmd(action.actionId)
+						subscrAction.Address = foundCmd.Address
+						instance.getFromDataStore(subscrAction) // Make sure current values are in dataStore
+					}
+				}
 				commands[actionName] = newAction // Only include commands that are writable to the console
 			}
 		}
 
-		const { graphics } = require('companion-module-utils')
 		const { combineRgb } = require('@companion-module/base')
-
-		feedbacks['Meter'] = {
-			type: 'advanced',
-			name: 'VUMeter',
-			description: 'Show a Bargraph VU Meter on the button',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Position',
-					id: 'position',
-					default: 'right',
-					choices: [
-						{ id: 'left', label: 'left' },
-						{ id: 'right', label: 'right' },
-						{ id: 'top', label: 'top' },
-						{ id: 'bottom', label: 'bottom' },
-					],
-				},
-				{
-					type: 'number',
-					label: 'Padding',
-					id: 'padding',
-					tooltip: 'Distance from edge of button',
-					min: 0,
-					max: 72,
-					default: 1,
-					required: true,
-				},
-				{
-					type: 'textinput',
-					label: 'Value 1',
-					id: 'meterVal1',
-					default: '-20',
-					useVariables: true,
-				},
-				{
-					type: 'textinput',
-					label: 'Value 2',
-					id: 'meterVal2',
-					default: '',
-					useVariables: true,
-				},
-			],
-			callback: async (feedback, context) => {
-				let position = feedback.options.position
-				let padding = feedback.options.padding
-				let ofsX1 = 0
-				let ofsX2 = 0
-				let ofsY1 = 0
-				let ofsY2 = 0
-				let bWidth = 0
-				let bLength = 0
-				const bVal = (mtrVal) => {
-					switch (true) {
-						case mtrVal <= -30:
-							return mtrVal + 62
-						case mtrVal <= -18:
-							return (mtrVal + 30) * 2 + 25
-						case mtrVal <= 0:
-							return (mtrVal + 18) * 2.5 + 54
-						default:
-							return 100 // mtrVal > 0
-					}
-				}
-				switch (position) {
-					case 'left':
-						ofsX1 = padding
-						ofsY1 = 5
-						bWidth = feedback.options.meterVal2 ? 3 : 6
-						bLength = feedback.image.height - ofsY1 * 2
-						ofsX2 = ofsX1 + bWidth + 1
-						ofsY2 = ofsY1
-						break
-					case 'right':
-						ofsY1 = 5
-						bWidth = feedback.options.meterVal2 ? 3 : 6
-						bLength = feedback.image.height - ofsY1 * 2
-						ofsX2 = feedback.image.width - bWidth - padding
-						ofsX1 = feedback.options.meterVal2 ? ofsX2 - bWidth - 1 : ofsX2
-						ofsY2 = ofsY1
-						break
-					case 'top':
-						ofsX1 = 5
-						ofsY1 = padding
-						bWidth = feedback.options.meterVal2 ? 3 : 7
-						bLength = feedback.image.width - ofsX1 * 2
-						ofsX2 = ofsX1
-						ofsY2 = ofsY1 + bWidth + 1
-						break
-					case 'bottom':
-						ofsX1 = 5
-						bWidth = feedback.options.meterVal2 ? 3 : 7
-						ofsY2 = feedback.image.height - bWidth - padding
-						bLength = feedback.image.width - ofsX1 * 2
-						ofsX2 = ofsX1
-						ofsY1 = feedback.options.meterVal2 ? ofsY2 - bWidth - 1 : ofsY2
-				}
-				const options1 = {
-					width: feedback.image.width,
-					height: feedback.image.height,
-					colors: [
-						{ size: 45, color: combineRgb(0, 255, 0), background: combineRgb(0, 255, 0), backgroundOpacity: 64 },
-						{ size: 52, color: combineRgb(255, 165, 0), background: combineRgb(255, 165, 0), backgroundOpacity: 64 },
-						{ size: 1, color: combineRgb(255, 0, 0), background: combineRgb(255, 0, 0), backgroundOpacity: 64 },
-					],
-					barLength: bLength,
-					barWidth: bWidth,
-					type: position == 'left' || position == 'right' ? 'vertical' : 'horizontal',
-					value: bVal(1 * (await context.parseVariablesInString(feedback.options.meterVal1))),
-					offsetX: ofsX1,
-					offsetY: ofsY1,
-					opacity: 255,
-				}
-				const peak1 = {
-					...options1,
-					colors: [
-						{ size: 100, color: combineRgb(255, 0, 0), background: combineRgb(255, 0, 0), backgroundOpacity: 64 },
-					],
-					value: 100,
-				}
-				let options2 = undefined
-				let peak2 = undefined
-				if (feedback.options.meterVal2) {
-					options2 = {
-						...options1,
-						value: bVal(1 * (await context.parseVariablesInString(feedback.options.meterVal2))),
-						offsetX: ofsX2,
-						offsetY: ofsY2,
-					}
-					peak2 = {
-						...options2,
-						colors: [
-							{ size: 100, color: combineRgb(255, 0, 0), background: combineRgb(255, 0, 0), backgroundOpacity: 64 },
-						],
-						value: 100,
-					}
-				}
-
-				let bars = options1.value == 100 ? [graphics.bar(peak1)] : [graphics.bar(options1)]
-				if (options2) {
-					bars.push(options2.value == 100 ? graphics.bar(peak2) : graphics.bar(options2))
-				}
-
-				return { imageBuffer: graphics.stackImage(bars) }
-			},
-		}
 
 		instance.setActionDefinitions(commands)
 		instance.setFeedbackDefinitions(feedbacks)
