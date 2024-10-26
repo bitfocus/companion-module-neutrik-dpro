@@ -32,15 +32,13 @@ class Neutrik_DPRO extends InstanceBase {
 		this.queueTimer
 		this.kaTimer = {}
 		this.variables = []
-		this.newConsole()
+		this.newDpro()
 	}
 
 	// Change in Configuration
 	async configUpdated(cfg) {
 		config = cfg
-		if (config.model) {
-			this.newConsole()
-		}
+		this.newDpro()
 	}
 
 	// Module deletion
@@ -91,7 +89,7 @@ class Neutrik_DPRO extends InstanceBase {
 	}
 
 	// Whenever the console type changes, update the info
-	newConsole() {
+	newDpro() {
 		this.log('info', `Device selected: ${config.model}`)
 		rcpCommands = paramFuncs.getParams(this, config)
 

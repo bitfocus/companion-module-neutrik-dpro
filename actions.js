@@ -62,18 +62,7 @@ module.exports = {
 				useVariables: true,
 				allowCustom: true,
 			}
-			if (rcpCmd.Type == 'mtr') {
-				YOpts.type = 'dropdown'
-				let pickoffs = rcpCmd.Pickoff?.split('|')
-				if (pickoffs) {
-					YOpts.label = 'Pickoff'
-					YOpts.choices = []
-					for (i = 0; i < pickoffs.length; i++) {
-						YOpts.choices.push({ id: i + 1, label: pickoffs[i] })
-					}
-					YOpts.default = 1
-				}
-			}
+
 			paramsToAdd.push(YOpts)
 		}
 		if (rcpNameIdx < actionNameParts.length - 1) {
@@ -108,11 +97,11 @@ module.exports = {
 				paramsToAdd.push(ValOpts)
 				break
 
-			case 'mtr':
-				ValOpts.label = 'Level'
+			/* 			case 'mtr':
+				ValOpts.label = 'Level' */
 
 			case 'integer':
-			case 'freq':
+				//			case 'freq':
 				if (rcpCmd.Max != 0 || rcpCmd.Min != 0) {
 					if (dProChoices[actionName] !== undefined) {
 						ValOpts.label = dProChoices[actionName].valName || actionNameParts[rcpNameIdx]
