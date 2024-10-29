@@ -11,7 +11,6 @@ const upgrades = require('./upgrades')
 
 const RCP_PORT = 49280
 const MSG_DELAY = 5
-const METER_REFRESH = 10000
 const KA_INTERVAL = 10000
 
 // Instance Setup
@@ -131,7 +130,6 @@ class Neutrik_DPRO extends InstanceBase {
 				this.processCmdQueue()
 				this.subscribeActions()
 				this.subscribeFeedbacks()
-
 				this.sendCmd(`scpmode keepalive ${KA_INTERVAL * 2}`) // Tell device to close connection after 2 * KA interval without RXing any messages
 				this.kaTimer = setInterval(() => this.sendCmd('devstatus runmode'), KA_INTERVAL) // Send message on KA interval to ensure connection isn't closed
 			})
