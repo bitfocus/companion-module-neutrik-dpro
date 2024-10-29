@@ -11,7 +11,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/bitfocus/companion-module-neutrik-rcp.git"
+		"url": "git+https://github.com/bitfocus/companion-module-neutrik-dpro.git"
 	},
 	"license": "MIT",
 	"devDependencies": {
