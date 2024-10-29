@@ -45,13 +45,6 @@ module.exports = {
 		const paramFuncs = require('./paramFuncs.js')
 		let rcpCmd = paramFuncs.findRcpCmd(cmd.Address)
 
-		if (rcpCmd.Type == 'mtr') {
-			data = data - 126
-			if (rcpCmd.Pickoff && cmd.Y > 0) {
-				cmd.Y = rcpCmd.Pickoff.split('|')[cmd.Y - 1] || undefined
-			}
-		}
-
 		if (rcpCmd.Type == 'integer' || rcpCmd.Type == 'freq') {
 			data = data == -32768 ? '-Inf' : data / rcpCmd.Scale
 		}

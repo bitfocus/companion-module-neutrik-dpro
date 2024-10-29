@@ -1,6 +1,6 @@
 module.exports = {
 	makeChNames: (r) => {
-		for (let i = 1; i <= 288; i++) {
+		for (let i = 1; i <= 2; i++) {
 			r.chNames.push({ id: i, label: `CH${i}` })
 		}
 		return r.chNames
@@ -36,9 +36,6 @@ module.exports = {
 
 			rcpCmds.forEach((cmd) => {
 				let rcpName = cmd.Address.slice(cmd.Address.indexOf('/') + 1) // String after "MIXER:Current/"
-				if (rcpName.endsWith('Color')) {
-					instance.colorCommands.push(rcpName)
-				}
 				if (cmd.Type == 'integer' && cmd.Max == 1) {
 					cmd.Type = 'bool'
 				}
@@ -64,28 +61,9 @@ module.exports = {
 			'RW',
 			'Scale',
 		]
-		const RCP_METER_DEF_FIELDS = [
-			'Ok',
-			'Action',
-			'Index',
-			'Address',
-			'X',
-			'Y',
-			'Min',
-			'Max',
-			'Default',
-			'Unit',
-			'Type',
-			'UI',
-			'RW',
-			'Scale',
-			'Pickoff',
-		]
+
 		const RCP_PARAM_FIELDS = ['Status', 'Action', 'Address', 'X', 'Y', 'Val', 'TxtVal']
 		const RCP_DEVINFO_FIELDS = ['Status', 'Action', 'Address', 'Val']
-		const RCP_SCENE_FIELDS = ['Status', 'Action', 'Address', 'Val', 'ScnStatus']
-		const RCP_SCNINFO_FIELDS = ['Status', 'Action', 'Address', 'Val', 'TxtVal', 'ScnName', 'ScnComment', 'ScnType']
-		const RCP_METER_FIELDS = ['Status', 'Action', 'Address', 'Name']
 		let cmds = []
 		let line = []
 		const lines = data.toString().split('\x0A')
@@ -100,10 +78,6 @@ module.exports = {
 				let params = RCP_PARAM_DEF_FIELDS
 
 				switch (line[1].trim()) {
-					case 'mtrinfo':
-						params = RCP_METER_DEF_FIELDS
-						break
-
 					case 'set':
 					case 'get':
 					case 'mtrstart':
@@ -115,27 +89,6 @@ module.exports = {
 					case 'scpmode':
 						params = RCP_DEVINFO_FIELDS
 						break
-
-					case 'sscurrent_ex':
-					case 'sscurrentt_ex':
-					case 'ssrecall_ex':
-					case 'ssrecallt_ex':
-					case 'ssupdate_ex':
-					case 'ssupdatet_ex':
-					case 'event':
-						params = RCP_SCENE_FIELDS
-						break
-
-					case 'ssinfo_ex':
-					case 'ssinfot_ex':
-						params = RCP_SCNINFO_FIELDS
-						break
-
-					case 'mtr':
-						params = RCP_METER_FIELDS
-						for (k = 3; k < line.length; k++) {
-							params.push(k - 3)
-						}
 				}
 
 				for (var j = 0; j < Math.min(line.length, params.length); j++) {
@@ -157,22 +110,6 @@ module.exports = {
 		let prefix = cmdToFmt.prefix
 		let cmdStart = prefix
 		let options = { X: cmdToFmt.X, Y: cmdToFmt.Y, Val: cmdToFmt.Val }
-
-		if (rcpCmd.Index >= 2000) {
-			// Meters
-			if (!config.metering) return
-			cmdStart = 'mtrstart'
-			cmdName = cmdName.replace('/Meter', '') // Remove "Meter" from the beginning of the command
-			if (config.model == 'XDIP') {
-				cmdName = cmdName.replace(/\/.*Ch/, '/Dev')
-			}
-			if (rcpCmd.Pickoff) {
-				let pickoffs = rcpCmd.Pickoff.split('|')
-				cmdName += '/' + pickoffs[options.Y] // Add the Pickoff Parameter
-			}
-			options.X = config.meterSpeed
-			options.Y = ''
-		}
 
 		let cmdStr = `${cmdStart} ${cmdName}`
 		if (prefix == 'set' && rcpCmd.Index < 1010) {
@@ -211,18 +148,10 @@ module.exports = {
 	},
 
 	parseVal: (context, cmd) => {
-		const hpf = require('./hpf')
 		let val = cmd.Val
 		let rcpCmd = module.exports.findRcpCmd(cmd.Address)
 
 		if (rcpCmd.Type == 'string' || rcpCmd.Type == 'binary') {
-			return val
-		}
-
-		if (rcpCmd.Type == 'mtr') {
-			if (!isNaN(cmd.Val)) {
-				val = parseInt(cmd.Val) + 126
-			}
 			return val
 		}
 
@@ -253,9 +182,6 @@ module.exports = {
 		} else {
 			if (rcpCmd.Type != 'freq') {
 				val = curVal + val
-			} else {
-				const index = hpf.findIndex((f) => f == curVal)
-				val = hpf[Math.min(Math.max(index + val / rcpCmd.Scale, 0), hpf.length - 1)]
 			}
 		}
 		val = Math.min(Math.max(val, rcpCmd.Min), rcpCmd.Max) // Clamp it
@@ -266,11 +192,6 @@ module.exports = {
 	findRcpCmd: (cmdName, cmdAction = '') => {
 		let rcpCmd = undefined
 		if (cmdName != undefined) {
-			if (cmdAction == 'mtr') {
-				cmdName = cmdName.replace('Current/', 'Current/Meter/')
-				cmdName = cmdName.replace('/Dev/OutputLevel', '/OutCh/OutputLevel')
-				cmdName = cmdName.replace('/Dev/InputLevel', '/InCh/InputLevel')
-			}
 			let cmdToFind = cmdName.replace(/:/g, '_')
 			rcpCmd = rcpCommands.find((cmd) => cmd.Address.replace(/:/g, '_').startsWith(cmdToFind))
 		}

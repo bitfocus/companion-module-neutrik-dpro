@@ -5,8 +5,8 @@
 	"description": "Neutrik NA2-IO-DPRO",
 	"version": "0.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-neutrik-rcp.git",
-	"bugs": "https://discourse.checkcheckonetwo.com",
+	"repository": "git+https://github.com/bitfocus/companion-module-neutrik-dpro.git",
+	"bugs": "https://github.com/bitfocus/companion-module-neutrik-dpro/issues",
 	"maintainers": [
 		{
 			"name": "Andrew Broughton",

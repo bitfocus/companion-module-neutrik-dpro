@@ -1,4 +1,4 @@
-## Neutrik DPRO Remote Control Protocol 1.0.0 - for Companion v3
+## Neutrik DPRO Remote Control Protocol 1.0.1 - for Companion v3
 
 **Available commands**
 
@@ -11,6 +11,10 @@ _Andrew Broughton & Phillip Ivan Pietruschka_
 ---
 
 **REVISION HISTORY**
+
+1.0.1
+
+- Cleanup
 
 1.0.0
 
