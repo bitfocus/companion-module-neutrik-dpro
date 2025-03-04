@@ -23,7 +23,7 @@ module.exports = {
 				id: 'X',
 				default: 1,
 				required: true,
-				useVariables: true,
+				useVariables: { local: true },
 			}
 			if (dProChoices[actionName] !== undefined) {
 				XOpts = {
@@ -59,7 +59,7 @@ module.exports = {
 				id: 'Y',
 				default: 1,
 				required: true,
-				useVariables: true,
+				useVariables: { local: true },
 				allowCustom: true,
 			}
 
@@ -78,7 +78,7 @@ module.exports = {
 			required: true,
 			minChoicesForSearch: 0,
 			allowCustom: true,
-			useVariables: true,
+			useVariables: { local: true },
 		}
 		switch (rcpCmd.Type) {
 			case 'bool':

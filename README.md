@@ -12,6 +12,10 @@ _Andrew Broughton & Phillip Ivan Pietruschka_
 
 **REVISION HISTORY**
 
+1.0.2
+
+- Declare support for local variables
+
 1.0.1
 
 - Cleanup
