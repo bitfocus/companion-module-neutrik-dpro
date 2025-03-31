@@ -2,6 +2,7 @@ node_modules/
 package-lock.json
 /pkg
 /pkg.tgz
+neutrik-dpro-*.tgz
 DEBUG-*
 .DS_Store
 companion-module-neutrik-rcp.code-workspace

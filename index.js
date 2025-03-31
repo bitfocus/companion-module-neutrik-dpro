@@ -1,6 +1,6 @@
 // Control module for Neutrik NA2-IO-DPRO
 // Andrew Broughton <andy@checkcheckonetwo.com>
-// October 2024 Version 1.0.0 (for Companion v3)
+// October 2024 Version 1.0.3 (for Companion v3)
 
 const { InstanceBase, InstanceStatus, Regex, runEntrypoint, combineRgb, TCPHelper } = require('@companion-module/base')
 
@@ -71,11 +71,12 @@ class Neutrik_DPRO extends InstanceBase {
 			{
 				type: 'textinput',
 				id: 'host',
-				label: 'IP Address of Device',
+				label: 'Control IP Address of Device',
 				width: 6,
 				default: '192.168.0.128',
 				regex: Regex.IP,
 				isVisible: (options) => !options.bonjour_host,
+				tooltip: 'The DPRO has 2 interfaces, Control and Dante. The can only connect to the control interface.',
 			},
 			{
 				type: 'static-text',
