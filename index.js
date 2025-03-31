@@ -76,7 +76,7 @@ class Neutrik_DPRO extends InstanceBase {
 				default: '192.168.0.128',
 				regex: Regex.IP,
 				isVisible: (options) => !options.bonjour_host,
-				tooltip: 'The DPRO has 2 interfaces, Control and Dante. The can module only connect to the control interface.',
+				tooltip: 'The DPRO has 2 interfaces, Control and Dante. The module can only connect to the control interface.',
 			},
 			{
 				type: 'static-text',
